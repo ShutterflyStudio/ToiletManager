@@ -1,21 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class CameraController : MonoBehaviour
 {
     public float cameraSpeed;
     public float movementTime;
+    private bool isSelected;
     public Vector3 zoomAmount;
-    private Transform camera;
     private Vector3 targetPosition;
     private Vector3 targetZoom;
+    private Transform camera;
+    private CinemachineVirtualCamera cmvcam;
 
     private void Start()
     {
         camera = Camera.main.transform;
+        cmvcam = GetComponentInChildren<CinemachineVirtualCamera>();
         targetPosition = transform.position;
         targetZoom = camera.localPosition;
+
+
     }
 
     private void Update()
@@ -32,6 +38,16 @@ public class CameraController : MonoBehaviour
         }
         camera.localPosition = Vector3.Lerp(camera.localPosition, targetZoom, Time.deltaTime * movementTime);
 
+    }
+
+    private void SelectToilet(Transform _target)
+    {
+        cmvcam.m_Follow = _target;
+    }
+
+    private void Deselect()
+    {
+        cmvcam.m_Follow = null;
     }
 
     private void HandleInput()
@@ -65,7 +81,30 @@ public class CameraController : MonoBehaviour
                 targetZoom *= distance;
             }
 
-            transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * movementTime);
+            if (Input.touchCount != 1)
+            {
+                isSelected = false;
+                return;
+            }
+
+            if (finger0.phase == TouchPhase.Began)
+            {
+                Vector3 position = finger0.position;
+
+                Ray ray = Camera.main.ScreenPointToRay(position);
+                RaycastHit hit;
+
+                if (Physics.Raycast(ray, out hit))
+                {
+                    Debug.Log(hit.collider.name);
+                    if (hit.collider.CompareTag("Toilet"))
+                    {
+                        SelectToilet(hit.transform);
+                    }
+                }
+            }
+
+            transform.position = Vector3.MoveTowards(transform.position, targetPosition, movementTime * Time.deltaTime);
             camera.localPosition = Vector3.Lerp(camera.localPosition, targetZoom, Time.deltaTime * movementTime);
         }
     }
