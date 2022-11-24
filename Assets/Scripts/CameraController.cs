@@ -99,8 +99,8 @@ public class CameraController : MonoBehaviour
                     Debug.Log(hit.collider.name);
                     if (hit.collider.CompareTag("Toilet"))
                     {
-                        SelectToilet(hit.transform);
-                    }
+                        SelectToilet(hit.transform.parent);
+                    }else { Deselect(); }
                 }
             }
 
