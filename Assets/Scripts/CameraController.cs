@@ -12,6 +12,7 @@ public class CameraController : MonoBehaviour
     private Vector3 targetPosition;
     private Vector3 targetZoom;
     private Transform camera;
+    private Toilet currentToilet;
     private CinemachineVirtualCamera cmvcam;
 
     private void Start()
@@ -40,13 +41,15 @@ public class CameraController : MonoBehaviour
 
     }
 
-    private void SelectToilet(Transform _target)
+    private void SelectToilet(Toilet _toilet)
     {
-        cmvcam.m_Follow = _target;
+        cmvcam.m_Follow = _toilet.transform;
+        _toilet.SelectThis();
     }
 
     private void Deselect()
     {
+        currentToilet.DeselctThis();
         cmvcam.m_Follow = null;
     }
 
@@ -99,8 +102,10 @@ public class CameraController : MonoBehaviour
                     Debug.Log(hit.collider.name);
                     if (hit.collider.CompareTag("Toilet"))
                     {
-                        SelectToilet(hit.transform.parent);
-                    }else { Deselect(); }
+                        SelectToilet(hit.transform.GetComponentInParent<Toilet>());
+                        currentToilet = hit.transform.GetComponentInParent<Toilet>();
+                    }
+                    else { Deselect(); }
                 }
             }
 
